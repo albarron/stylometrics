@@ -673,7 +673,7 @@ def main(args=None):
 
     with open(args.iFile) as f:
     	for line in f:
-    		text = line.split('\t')[4]
+    		text = line.split('\t')[4].replace(". <NS>", ". ").replace(" <NS>", ". ")
     		sentences = sent_tokenize(text, language='spanish')
     		# sentencesNoPunctDig = [line.rstrip().translate(str.maketrans('', '', string.punctuation)).translate(str.maketrans('', '', string.digits)) for line in f]
     		sentencesNoPunctDig = [line.translate(str.maketrans('', '', string.punctuation)).translate(str.maketrans('', '', string.digits)) for line in sentences]
