@@ -666,76 +666,80 @@ def main(args=None):
     ]
 
     print("\t".join(FEATURES))
+    means = {x:0 for x in FEATURES}
 
 
     lan = args.lan
     # read input file
 
     with open(args.iFile) as f:
-    	for line in f:
-    		text = line.split('\t')[4].replace(". <NS>", ". ").replace(" <NS>", ". ")
-    		sentences = sent_tokenize(text, language='spanish')
-    		# sentencesNoPunctDig = [line.rstrip().translate(str.maketrans('', '', string.punctuation)).translate(str.maketrans('', '', string.digits)) for line in f]
-    		sentencesNoPunctDig = [line.translate(str.maketrans('', '', string.punctuation)).translate(str.maketrans('', '', string.digits)) for line in sentences]
+        i=0
+        for line in f:
+            i+=1
+            text = line.split('\t')[4].replace(". <NS>", ". ").replace(" <NS>", ". ")
+            sentences = sent_tokenize(text, language='spanish')
+            # sentencesNoPunctDig = [line.rstrip().translate(str.maketrans('', '', string.punctuation)).translate(str.maketrans('', '', string.digits)) for line in f]
+            sentencesNoPunctDig = [line.translate(str.maketrans('', '', string.punctuation)).translate(str.maketrans('', '', string.digits)) for line in sentences]
 
-    		textNoPuncDig = text.translate(str.maketrans('', '', string.punctuation))
-    		textNoPuncDig = textNoPuncDig.translate(str.maketrans('', '', string.digits))
+            textNoPuncDig = text.translate(str.maketrans('', '', string.punctuation))
+            textNoPuncDig = textNoPuncDig.translate(str.maketrans('', '', string.digits))
 
-    		# initialise results as a dictionary
-    		results = {}
-    		# text statistics measures
-    		results['\# sentences'] = len(sentences)
-    		results['\# tokens'] = numWords(text)
-    		results['\# words (w/o punc,dig)'] = numWords(textNoPuncDig)
-    		results['\# types'] = numTypes(textNoPuncDig.lower())
-    		results['\% digits (dig)'] = round(digit_pctg(text)*100,2)
-    		results['\% uppercase'] = round(uppercase_pctg(text)*100,2)
-    		results['\% punctuation (punc)'] = round(punctuation_pctg(text)*100,2)
-    		results['\% funtion words'] = round(functionWords_freq(text.lower(), args.stopWordFile)*100,1)
-    		results['sentence length (words)'] = round(sentenceLength(sentences),1)
-    		results['token length'] = round(wordLength(text),2)
-    		results['word length (chars)'] = round(wordLength(textNoPuncDig),1)
-    		results['\# syllables'] = numSyllables(textNoPuncDig,'de')
-    		results['syllables/word'] = round(numSyllables(textNoPuncDig,'de')/numWords(textNoPuncDig),2)
+            # initialise results as a dictionary
+            results = {}
+            # text statistics measures
+            results['\# sentences'] = len(sentences)
+            results['\# tokens'] = numWords(text)
+            results['\# words (w/o punc,dig)'] = numWords(textNoPuncDig)
+            results['\# types'] = numTypes(textNoPuncDig.lower())
+            results['\% digits (dig)'] = round(digit_pctg(text)*100,2)
+            results['\% uppercase'] = round(uppercase_pctg(text)*100,2)
+            results['\% punctuation (punc)'] = round(punctuation_pctg(text)*100,2)
+            results['\% funtion words'] = round(functionWords_freq(text.lower(), args.stopWordFile)*100,1)
+            results['sentence length (words)'] = round(sentenceLength(sentences),1)
+            results['token length'] = round(wordLength(text),2)
+            results['word length (chars)'] = round(wordLength(textNoPuncDig),1)
+            results['\# syllables'] = numSyllables(textNoPuncDig,'de')
+            results['syllables/word'] = round(numSyllables(textNoPuncDig,'de')/numWords(textNoPuncDig),2)
 
-    		# text richness measures
-    		results['type/token ratio'] = round(ttr(text.lower())*100,2)
-    		results['type/word ratio'] = round(ttr(textNoPuncDig.lower())*100,1)
-    		results['\% hapax legomena'] = round(hapaxLegomena_ratio(textNoPuncDig.lower())*100,1)
-    		results['\% dislegomena'] = round(hapaxDislegomena_ratio(textNoPuncDig.lower())*100,2)
-    		results['Entropy (tokens)'] = round(shannonEntropy(text),2)
-    		results['Entropy (words)'] = round(shannonEntropy(textNoPuncDig.lower()),1)
-    		results['Yule K (tokens)'] = round(yuleK(text),2)
-    		results['Yule K (words)'] = round(yuleK(textNoPuncDig.lower()),1)
+            # text richness measures
+            results['type/token ratio'] = round(ttr(text.lower())*100,2)
+            results['type/word ratio'] = round(ttr(textNoPuncDig.lower())*100,1)
+            results['\% hapax legomena'] = round(hapaxLegomena_ratio(textNoPuncDig.lower())*100,1)
+            results['\% dislegomena'] = round(hapaxDislegomena_ratio(textNoPuncDig.lower())*100,2)
+            results['Entropy (tokens)'] = round(shannonEntropy(text),2)
+            results['Entropy (words)'] = round(shannonEntropy(textNoPuncDig.lower()),1)
+            results['Yule K (tokens)'] = round(yuleK(text),2)
+            results['Yule K (words)'] = round(yuleK(textNoPuncDig.lower()),1)
 
-    		# text complexity measures
-    		results['\% short words ($<$4chars)'] = round(shortWords(textNoPuncDig)*100,1)
-    		results['\# words $>$ 2 syls'] = wordsMoreXSyls(textNoPuncDig,2,lan)
-    		results['\% words $>$ 2 syls'] = round(wordsMoreXSyls(textNoPuncDig,2,lan)/numWords(textNoPuncDig)*100,1)
-    		# results['Flesch Reading Ease'] = round(flesch_reading_ease(sentencesNoPunctDig,lan),1)
-    		if (lan == 'es'):
-    			results['Fernandez Huerta'] = round(fernandezHuerta_ease(sentencesNoPunctDig,lan),2)
-    			results['Szigriszt-Pazos/INFLEZ'] = round(fleschSzigriszt(sentencesNoPunctDig,lan),2)
-    			results['(tok) Fernandez Huerta'] = round(fernandezHuerta_ease(sentences,lan),2)
-    			results['(tok) Szigriszt-Pazos/INFLEZ'] = round(fleschSzigriszt(sentences,lan),2)
-    		elif (lan == 'de'):
-    			results['Wiener Sachtextformel'] = round(wienerSTF(textNoPuncDig,sentencesNoPunctDig,lan),1)
+            # text complexity measures
+            results['\% short words ($<$4chars)'] = round(shortWords(textNoPuncDig)*100,1)
+            results['\# words $>$ 2 syls'] = wordsMoreXSyls(textNoPuncDig,2,lan)
+            results['\% words $>$ 2 syls'] = round(wordsMoreXSyls(textNoPuncDig,2,lan)/numWords(textNoPuncDig)*100,1)
+            # results['Flesch Reading Ease'] = round(flesch_reading_ease(sentencesNoPunctDig,lan),1)
+            if (lan == 'es'):
+            	results['Fernandez Huerta'] = round(fernandezHuerta_ease(sentencesNoPunctDig,lan),2)
+            	results['Szigriszt-Pazos/INFLEZ'] = round(fleschSzigriszt(sentencesNoPunctDig,lan),2)
+            	results['(tok) Fernandez Huerta'] = round(fernandezHuerta_ease(sentences,lan),2)
+            	results['(tok) Szigriszt-Pazos/INFLEZ'] = round(fleschSzigriszt(sentences,lan),2)
+            elif (lan == 'de'):
+            	results['Wiener Sachtextformel'] = round(wienerSTF(textNoPuncDig,sentencesNoPunctDig,lan),1)
 
-    		sentencesNoSW = removeSWList(sentencesNoPunctDig,args.stopWordFile) # lowercased output!
-    		G = adjG(sentencesNoSW)
-    		results['Laplacian Energy'] = round(laplacianEnergy(G),4)
-    		results['Clustering'] = round(clusteringGraph(G),4)
+            sentencesNoSW = removeSWList(sentencesNoPunctDig,args.stopWordFile) # lowercased output!
+            G = adjG(sentencesNoSW)
+            results['Laplacian Energy'] = round(laplacianEnergy(G),4)
+            results['Clustering'] = round(clusteringGraph(G),4)
 
-    		to_print = [str(results[key]) for key in FEATURES]
-    		# for feat in FEATURES:
-    		print("\t".join(to_print))
-    		# if (args.v):
-    		# 	printResults(results, 'v')
-    		# else:
-    		# 	printResults(results, 'h')
+            # computing means
+            for key in FEATURES:
+                means[key]  += results[key] 
 
-    		# print("Most common content words:")
-    		# print(kMostFreqWords(sentencesNoSW,11))
+            #displaying 
+            to_print = [str(results[key]) for key in FEATURES]
+            # for feat in FEATURES:
+            print("\t".join(to_print))
+    	
+        to_print = [str(means[key] / i) for key in FEATURES]
+        print("\t".join(to_print))
 
 if __name__ == "__main__":
    main()
